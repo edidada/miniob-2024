@@ -1,4 +1,6 @@
 ./deps/3rd
+./deps/3rd/libevent
+deps/3rd/*
 ./deps/libevent
 ./deps/googletest
 ./deps/jsoncpp
@@ -34,3 +36,4 @@ src/observer/sql/parser/lex_sql.h
 src/observer/sql/parser/yacc_sql.cpp
 src/observer/sql/parser/yacc_sql.hpp
 #*#
+.codebuddy
