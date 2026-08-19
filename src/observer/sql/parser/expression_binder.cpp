@@ -26,7 +26,7 @@ using namespace common;
 Table *BinderContext::find_table(const char *table_name) const
 {
   auto pred = [table_name](Table *table) { return 0 == strcasecmp(table_name, table->name()); };
-  auto iter = ranges::find_if(query_tables_, pred);
+  auto iter = find_if(query_tables_.begin(), query_tables_.end(), pred);
   if (iter == query_tables_.end()) {
     return nullptr;
   }

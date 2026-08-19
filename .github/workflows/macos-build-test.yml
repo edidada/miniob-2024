@@ -1,0 +1,60 @@
+name: macos-build-test
+
+on:
+  push:
+    branches: [ "main", "main_mac" ]
+  pull_request:
+    branches: [ "main", "main_mac" ]
+
+jobs:
+  build-and-smoke-test:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository and submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      # macOS 自带 bison 2.3 太老，项目 yacc 语法需要 bison 3.x
+      - name: Setup build tools (bison/flex)
+        shell: bash
+        run: |
+          brew install bison flex
+          echo "$(brew --prefix bison)/bin" >> "$GITHUB_PATH"
+          echo "$(brew --prefix flex)/bin" >> "$GITHUB_PATH"
+          cmake --version
+          clang --version
+
+      - name: Init dependencies
+        shell: bash
+        run: |
+          sudo bash build.sh init
+
+      # macOS 无 nproc 命令，必须显式传入 -jN 覆盖 build.sh 默认值
+      - name: Build Debug
+        shell: bash
+        run: |
+          bash build.sh debug --make -j4
+
+      - name: CRUD smoke test (obclient over unix socket)
+        shell: bash
+        run: |
+          mkdir -p /tmp/miniob_ci
+          cp etc/observer.ini /tmp/miniob_ci/
+          nohup ./build_debug/bin/observer -T one-thread-per-connection \
+            -s /tmp/miniob_ci/miniob.sock -f /tmp/miniob_ci/observer.ini \
+            -P mysql -t mvcc -d disk > /tmp/miniob_ci/observer.log 2>&1 &
+          sleep 3
+          printf 'create table t(id int, name char(10));\ninsert into t values (1, "a");\ninsert into t values (2, "b");\nselect * from t;\nselect id, name from t where id = 2;\nupdate t set name = "c" where id = 1;\nselect * from t;\ndelete from t where id = 2;\nselect * from t;\nquit;\n' \
+            | ./build_debug/bin/obclient -s /tmp/miniob_ci/miniob.sock > /tmp/miniob_ci/obclient.out 2>&1 || true
+          cat /tmp/miniob_ci/obclient.out
+          echo "--- assertions ---"
+          # 建表/两条 insert/update/delete 应全部 SUCCESS（quit 断开显示 FAILURE 属正常）
+          succ=$(grep -c "SUCCESS" /tmp/miniob_ci/obclient.out || true)
+          echo "SUCCESS count: ${succ}"
+          [ "${succ}" -ge 6 ] || { echo "smoke test failed: not enough SUCCESS"; exit 1; }
+          # 更新生效检查：update 后 select 应能看到 "1 | c"
+          grep -q "1 | c" /tmp/miniob_ci/obclient.out || { echo "smoke test failed: update not effective"; exit 1; }
+          echo "smoke test passed"
+          killall observer 2>/dev/null || true

@@ -17,6 +17,7 @@ See the Mulan PSL v2 for more details. */
 #include <string>
 #include <vector>
 #include <memory>
+#include <utility>
 
 #include "common/value.h"
 
@@ -169,6 +170,7 @@ struct DeleteSqlNode
 /// 多字段的更新
 struct UpdateInfoNode
 {
+  UpdateInfoNode(std::string attr_name, Expression *expr_value) : attr(std::move(attr_name)), expr(expr_value) {}
   std::string attr;
   Expression *expr;
 };

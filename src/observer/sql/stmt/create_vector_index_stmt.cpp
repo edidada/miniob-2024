@@ -21,7 +21,7 @@ RC CreateVectorIndexStmt::create(Db *db, const CreateVectorIndexSqlNode &create_
   std::string  index_name   = create_vector_index.index_name;
   VectorIndex *vector_index = table->find_vector_index(index_name.c_str());
   if (vector_index != nullptr) {
-    LOG_WARN("vector index %s exists", index_name);
+    LOG_WARN("vector index %s exists", index_name.c_str());
     return RC::SCHEMA_INDEX_NAME_REPEAT;
   }
 

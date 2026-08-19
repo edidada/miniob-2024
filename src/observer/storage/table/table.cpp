@@ -743,7 +743,7 @@ RC Table::create_vector_index(Trx *trx, const FieldMeta *field_meta, const std::
   rc = get_record_scanner(scanner, trx, ReadWriteMode::READ_ONLY);
   if (OB_FAIL(rc)) {
     LOG_WARN("failed to create scanner while creating vector index. table=%s, index=%s, rc=%s",
-         name(), vector_index_name, strrc(rc));
+         name(), vector_index_name.c_str(), strrc(rc));
     return rc;
   }
   Record   record;
@@ -759,7 +759,7 @@ RC Table::create_vector_index(Trx *trx, const FieldMeta *field_meta, const std::
     rc = RC::SUCCESS;
   } else {
     LOG_WARN("failed to insert record into index while creating index. table=%s, index=%s, rc=%s",
-             name(), vector_index_name, strrc(rc));
+             name(), vector_index_name.c_str(), strrc(rc));
     return rc;
   }
   scanner.close_scan();
@@ -774,7 +774,7 @@ RC Table::create_vector_index(Trx *trx, const FieldMeta *field_meta, const std::
   TableMeta new_table_meta(table_meta_);
   rc = new_table_meta.add_vector_index(new_vector_index_meta);
   if (rc != RC::SUCCESS) {
-    LOG_ERROR("Failed to add vector index (%s) on table (%s). error=%d:%s", vector_index_name, name(), rc, strrc(rc));
+    LOG_ERROR("Failed to add vector index (%s) on table (%s). error=%d:%s", vector_index_name.c_str(), name(), rc, strrc(rc));
     return rc;
   }
 
@@ -801,7 +801,7 @@ RC Table::create_vector_index(Trx *trx, const FieldMeta *field_meta, const std::
   if (ret != 0) {
     LOG_ERROR("Failed to rename tmp meta file (%s) to normal meta file (%s) while creating vector index (%s) on table (%s). "
               "system error=%d:%s",
-              tmp_file.c_str(), meta_file.c_str(), vector_index_name, name(), errno, strerror(errno));
+              tmp_file.c_str(), meta_file.c_str(), vector_index_name.c_str(), name(), errno, strerror(errno));
     return RC::IOERR_WRITE;
   }
 

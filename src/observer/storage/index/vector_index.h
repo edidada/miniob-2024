@@ -18,7 +18,7 @@ public:
 
 private:
   VectorIndexMeta    meta_;
-  const size_t       dim_;
+  [[maybe_unused]] const size_t dim_;
   const DistanceType distance_type_;
   const size_t       lists_;
   const size_t       probes_;

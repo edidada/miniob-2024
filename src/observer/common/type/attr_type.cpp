@@ -49,4 +49,4 @@ size_t attr_type_size(AttrType type)
 
 size_t TextData::field_size = offsetof(TextData, len) + sizeof(TextData::len);
 
-size_t VectorData::field_size = offsetof(VectorData, VectorData::dim) + sizeof(VectorData::dim);
+size_t VectorData::field_size = offsetof(VectorData, dim) + sizeof(VectorData::dim);

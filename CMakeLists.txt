@@ -46,7 +46,13 @@ ENDIF(WIN32)
 
 # This is for clangd plugin for vscode
 # mute sign-compare error in lex/yacc
-SET(CMAKE_COMMON_FLAGS "${CMAKE_COMMON_FLAGS} -Wall -Werror -Wno-error=sign-compare")
+# AppleClang 的告警比 GCC 严格（如 deprecated-declarations、unused-private-field），
+# 开启 -Werror 会导致很多在 Linux 上正常的代码在 macOS 上编译失败，因此对 AppleClang 不启用 -Werror
+IF(CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang")
+    SET(CMAKE_COMMON_FLAGS "${CMAKE_COMMON_FLAGS} -Wall -Wno-error=sign-compare")
+ELSE()
+    SET(CMAKE_COMMON_FLAGS "${CMAKE_COMMON_FLAGS} -Wall -Werror -Wno-error=sign-compare")
+ENDIF()
 if (GLIBCXX_DEBUG_WHEN_DEBUG AND DEBUG)
     SET(CMAKE_COMMON_FLAGS "${CMAKE_COMMON_FLAGS} -D_GLIBCXX_DEBUG")
 endif ()

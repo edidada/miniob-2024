@@ -35,8 +35,8 @@ void VectorIndexMeta::to_json(Json::Value &json_value) const
   field_meta_.to_json(field_meta_json);
   json_value[FIELD_FIELD_NAME]    = field_meta_json;
   json_value[FIELD_DISTANCE_TYPE] = static_cast<int>(distance_type_);
-  json_value[FIELD_LISTS]         = lists_;
-  json_value[FIELD_PROBES]        = probes_;
+  json_value[FIELD_LISTS]  = static_cast<Json::UInt64>(lists_);
+  json_value[FIELD_PROBES] = static_cast<Json::UInt64>(probes_);
 }
 
 RC VectorIndexMeta::from_json(const TableMeta &table, const Json::Value &json_value, VectorIndexMeta &vector_index)
